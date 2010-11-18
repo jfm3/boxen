@@ -1,0 +1,68 @@
+This is boxen, a Common Lisp package that allows a programmer to write
+Unicode box characters when delimiting strings, comments, and
+sub-programs.  This preserves the indentation of text in the source
+code, yet allows the text to sit naturally and obviously at the same
+indent level as the source code surrounding it.  The best way to see
+how it works is with an example.  All of the following expressions are
+equivalent:
+
+(setf *foo* "a
+  hoo-ha
+         of
+            foos
+")
+
+(setf *foo* (format nil "~&a~
+                         ~%  hoo-ha~
+                         ~%         of~
+                         ~%            foos~%"))
+
+(setf *foo* ┌─────
+            │a
+            │  hoo-ha
+            │         of
+            │            foos
+            └─────)
+
+As many or as few #\BOX_DRAWINGS_LIGHT_HORIZONTAL characters may
+occur after the opening #\BOX_DRAWINGS_LIGHT_DOWN_AND_RIGHT
+character, forming a horizontal rule of any desired length,
+although they may not be followed by anything but white space and a
+single newline.  Each line thereafter must begin with optional
+whitespace and a single #\BOX_DRAWINGS_LIGHT_VERTICAL (*not* a
+#\VERTICAL_LINE).  Likewise, the final
+#\BOX_DRAWINGS_LIGHT_UP_AND_RIGHT character may be followed by any
+number of horizontals.  Blank lines within are not allowed.  The
+#\BOX_DRAWINGS_LIGHT_VERTICAL always marks the left edge of the
+line regardless of whitespace that occurs before it.  Emacs
+functions to automatically align verticals are available. 
+
+To a certain extent FORMAT ameliorates related problems in that
+#\TILDE followed by #\NEWLINE or @ collapses subsequent whitespace,
+but this is not useful when you want to preserve indentation.  The
+boxy syntax is meant to suggest what you see in an editor window or
+terminal more-or-less precisely.  Note that boxy syntax nests, even
+when internal strings are poorly formed.  
+
+Long "doc strings" are especially pretty in BOXEN -- I recommend
+filling them with some sane descendant of markdown.  The author's main
+intended use, however, is in writing programs that generate
+configuration files for other software.  Often times these
+configuration files are in a horribly broken language in which white
+space, double quotes, and so forth, are significant, and embedding
+them in yet another layer of slightly different string syntax is error
+prone and ugly.  Embedding them in this layer of *extremely* different
+string syntax seems preferable.
+
+In addition to the string syntax, a comment syntax is provided, which
+uses double lines.  Future work for this package involves tagging
+double lined syntax on the top line, and perhaps invoking sub-parsers
+to deal with their contents.  The result of evaluating a tagged double
+lined string is a closure that (presumably) coughs up a string when
+evaluated.
+
+This package can be installed and built with asdf.  Link the boxen.asd
+file into your systems directory (probabaly ~/.sbcl/systems) and do
+the following at your CL-USER prompt:
+
+    (asdf:operate 'asdf:load-op 'boxen)
